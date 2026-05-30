@@ -2,32 +2,33 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <title>Inpulse 500 DJ App</title>
+    <title>Inpulse 500 Web Controller</title>
     <style>
-        body { background: #1a1a1a; color: white; font-family: Arial; display: flex; flex-direction: column; align-items: center; }
-        .decks { display: flex; gap: 20px; margin-top: 50px; }
-        .deck { border: 2px solid #ff7700; padding: 20px; width: 300px; text-align: center; border-radius: 10px; }
-        .drop-zone { border: 2px dashed #ff7700; padding: 40px; margin-top: 10px; cursor: pointer; background: #222; }
-        audio { margin-top: 15px; width: 100%; }
+        /* Designul CSS este inclus aici pentru stabilitate */
+        body { background: #121212; color: white; font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; }
+        h1 { color: #ff7700; margin-top: 20px; }
+        .decks { display: flex; gap: 40px; margin-top: 30px; }
+        .deck { background: #1e1e1e; border: 2px solid #333; padding: 30px; width: 320px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
+        .drop-zone { border: 2px dashed #ff7700; padding: 50px 20px; margin: 20px 0; cursor: pointer; background: #2a2a2a; color: #ff7700; font-weight: bold; }
+        audio { width: 100%; filter: invert(1) hue-rotate(180deg); margin-top: 10px; }
     </style>
 </head>
 <body>
-    <h1>DJ Controller Inpulse 500</h1>
+    <h1>Inpulse 500 Controller</h1>
     <div class="decks">
         <div class="deck">
-            <h3>DECK A (Ch: 2)</h3>
+            <h3>DECK A</h3>
             <div class="drop-zone" id="dropA">TRAGE PIESA AICI</div>
             <audio id="audioA" controls></audio>
         </div>
         <div class="deck">
-            <h3>DECK B (Ch: 3)</h3>
+            <h3>DECK B</h3>
             <div class="drop-zone" id="dropB">TRAGE PIESA AICI</div>
             <audio id="audioB" controls></audio>
         </div>
     </div>
 
     <script>
-        // Funcție de încărcare rapidă (Streaming)
         function setupDeck(dropId, audioId) {
             const drop = document.getElementById(dropId);
             const audio = document.getElementById(audioId);
@@ -36,35 +37,13 @@
                 e.preventDefault();
                 const file = e.dataTransfer.files[0];
                 if (file) {
-                    audio.src = URL.createObjectURL(file); // Streaming direct, nu încarcă tot în RAM
+                    audio.src = URL.createObjectURL(file);
                     audio.play();
                 }
             });
         }
         setupDeck('dropA', 'audioA');
         setupDeck('dropB', 'audioB');
-
-        // Mapare MIDI (Bazată pe pozele tale)
-        navigator.requestMIDIAccess().then(access => {
-            access.inputs.forEach(input => {
-                input.onmidimessage = (e) => {
-                    const [status, note, velocity] = e.data;
-                    const audioA = document.getElementById('audioA');
-                    const audioB = document.getElementById('audioB');
-
-                    // Deck A (Status 145 = Canal 2)
-                    if (status === 145) {
-                        if (note === 7) audioA.play();      // PLAY
-                        if (note === 6) { audioA.pause(); audioA.currentTime = 0; } // CUE (Stop + Reset)
-                    }
-                    // Deck B (Status 146 = Canal 3)
-                    if (status === 146) {
-                        if (note === 7) audioB.play();      // PLAY
-                        if (note === 6) { audioB.pause(); audioB.currentTime = 0; } // CUE
-                    }
-                };
-            });
-        });
     </script>
 </body>
 </html>
